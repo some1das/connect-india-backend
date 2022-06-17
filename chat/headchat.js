@@ -103,11 +103,42 @@ exports.handleMessages = (socket, io) => {
         let target;
         console.log("--user id " + toUser)
         console.log("--to chat " + cid)
-
+        console.log(chat);
         usersIdWithSocketId.forEach((u) => {
             console.log(u)
             if (u.uid == toUser && u.cid == cid) {
                 io.to(u.sid).emit("r-chat-message", chat)
+                User.findById(u.sid, (err, sender) => {
+                    if (err) {
+
+                    }
+                    else {
+
+                        let sendersChats = sender.chats;
+                        let targetId = "";
+                        // console.log("this is 0000 " + sendersChats)
+                        sendersChats.forEach((sendersChat) => {
+                            console.log(sendersChat.userId + " >>>> " + u.uid + " >>>>>>> " + sendersChat.chatId)
+                            if (sendersChat.userId == u.uid) {
+                                console.log(">>>>>>>" + sendersChat.chatId)
+                                Chat.findByIdAndUpdate(sendersChat.chatId,
+                                    {
+                                        $push: {
+                                            messages: chat
+                                        }
+                                    }
+                                    , (err, myChat) => {
+                                        if (err) {
+                                            console.log("Not able to save it bro !")
+                                        }
+                                        else {
+                                            console.log("Yes chat saved to DB")
+                                        }
+                                    })
+                            }
+                        })
+                    }
+                })
                 console.log("yes found")
 
             }
